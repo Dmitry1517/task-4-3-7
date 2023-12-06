@@ -24,6 +24,8 @@ class GitHubRepositories {
     content.appendChild(this.repositoriesList);
   }
 
+  
+
   debounce(fn, debounceTime) {
     let timeout;
     return function () {
@@ -34,8 +36,9 @@ class GitHubRepositories {
   };
 
   searchRepositories() {
+    if (this.searchInput.value === " ") this.searchInput.value = ""
     if (this.searchInput.value.length > 0) {
-      fetch(`https://api.github.com/search/repositories?q=${this.searchInput.value}`)  
+      fetch(`https://api.github.com/search/repositories?q=${this.searchInput.value.trim()}`)  
         .then(response => response.json())
         .then(data => this.renderDropdown(data.items))
         .catch(error => console.log(error))
