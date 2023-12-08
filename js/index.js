@@ -16,15 +16,19 @@ class GitHubRepositories {
     this.repositoriesList = document.createElement('ul');
     this.repositoriesList.classList.add('repositories');
 
-    this.searchInput.addEventListener('keyup', this.debounce(this.searchRepositories.bind(this), 600));
+    this.delayTime = 600;
+
+    this.url = "https://api.github.com/search/repositories?q=";
+
+    this.autocompleteEntries = 5;
+
+    this.searchInput.addEventListener('keyup', this.debounce(this.searchRepositories.bind(this), this.delayTime));
 
     const content = document.querySelector(".content");
     content.appendChild(this.formElement);
     content.appendChild(this.dropdown);
     content.appendChild(this.repositoriesList);
   }
-
-  
 
   debounce(fn, debounceTime) {
     let timeout;
@@ -36,9 +40,14 @@ class GitHubRepositories {
   };
 
   searchRepositories() {
-    if (this.searchInput.value === " ") this.searchInput.value = ""
+    let counter = 0;
+    for (let i = 0; i < this.searchInput.value.length; i++) {
+      if (this.searchInput.value[i] != ' ') counter = 1;
+    }
+    if (counter == 0) this.searchInput.value = ""
+
     if (this.searchInput.value.length > 0) {
-      fetch(`https://api.github.com/search/repositories?q=${this.searchInput.value.trim()}`)  
+      fetch(this.url + this.searchInput.value.trim())  
         .then(response => response.json())
         .then(data => this.renderDropdown(data.items))
         .catch(error => console.log(error))
@@ -49,7 +58,7 @@ class GitHubRepositories {
   renderDropdown(items) {
     this.clearDropdown();
 
-    items.slice(0, 5).forEach(item => {
+    items.slice(0, this.autocompleteEntries).forEach(item => {
       const li = document.createElement('li');
       li.classList.add("dropdown__item")
       li.textContent = item.full_name;
